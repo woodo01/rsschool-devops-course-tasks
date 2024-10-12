@@ -8,20 +8,34 @@ on:
         branches:
             - main
 
+env:
+    AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
 jobs:
+    init:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                aws-region: eu-central-1
+                role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GithubActionsRole
+
+            - name: Set up Terraform
+              uses: hashicorp/setup-terraform@v3
+              with:
+                terraform_version: 1.6.0
+
+            - name: Terraform Init
+              run: terraform init
     check:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Code
               uses: actions/checkout@v3
-
-            - name: Setup Terraform
-              uses: hashicorp/setup-terraform@v2
-              with:
-                  terraform_version: 1.6.0
-
-            - name: Terraform Init
-              run: terraform init
 
             - name: Validate Terraform files
               run: terraform validate
