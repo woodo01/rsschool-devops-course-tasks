@@ -37,6 +37,7 @@ jobs:
               run: terraform init
 
     check:
+        needs: init
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Code
@@ -49,6 +50,7 @@ jobs:
               run: terraform fmt -check
 
     plan:
+        needs: check
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Code
@@ -63,7 +65,8 @@ jobs:
               run: terraform plan
 
     apply:
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        needs: plan
+        #if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Code
