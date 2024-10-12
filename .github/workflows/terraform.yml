@@ -23,6 +23,9 @@ jobs:
             - name: Validate Terraform files
               run: terraform validate
 
+            - name: Terraform Init
+              run: terraform init
+
             - name: Check Formatting
               run: terraform fmt -check
 
@@ -36,9 +39,6 @@ jobs:
               uses: hashicorp/setup-terraform@v2
               with:
                   terraform_version: 1.6.0
-
-            - name: Terraform Init
-              run: terraform init
 
             - name: Terraform Plan
               run: terraform plan
