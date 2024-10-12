@@ -20,11 +20,11 @@ jobs:
               with:
                   terraform_version: 1.6.0
 
-            - name: Validate Terraform files
-              run: terraform validate
-
             - name: Terraform Init
               run: terraform init
+
+            - name: Validate Terraform files
+              run: terraform validate
 
             - name: Check Formatting
               run: terraform fmt -check
