@@ -10,6 +10,7 @@ on:
 
 env:
     AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+    #REGION: ${{ variables.REGION }}
 
 permissions:
     id-token: write
@@ -26,7 +27,7 @@ jobs:
               uses: aws-actions/configure-aws-credentials@v4
               with:
                 aws-region: us-east-1
-                role-to-assume: arn:aws:iam::287703574697:role/GithubActionsRole
+                role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GithubActionsRole
 
             - name: Set up Terraform
               uses: hashicorp/setup-terraform@v3
@@ -74,13 +75,26 @@ jobs:
             - name: Checkout Code
               uses: actions/checkout@v3
 
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                aws-region: us-east-1
+                role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GithubActionsRole
+
+            - name: Restore terraform cache
+              uses: actions/cache/restore@v4
+              with:
+                path: .terraform*
+                key: terraform-cache-${{ runner.os }}-${{ github.run_id }}
+                fail-on-cache-miss: true
+
             - name: Setup Terraform
               uses: hashicorp/setup-terraform@v2
               with:
                   terraform_version: 1.6.0
 
             - name: Terraform Plan
-              run: terraform plan
+              run: terraform plan -input=false
 
     apply:
         needs: plan
