@@ -29,7 +29,7 @@ resource "aws_iam_role" "github_actions_role" {
         Principal = {
           Federated = "arn:aws:iam::287703574697:oidc-provider/token.actions.githubusercontent.com"
         }
-        Action    = "sts:AssumeRoleWithWebIdentity"
+        Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
             "token.actions.githubusercontent.com:sub" : "repo:woodo01/rsschool-devops-course-tasks:*"
