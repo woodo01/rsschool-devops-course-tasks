@@ -7,16 +7,6 @@ terraform {
   }
 }
 
-variable "bucket_name" {
-  type        = string
-  description = "S3 bucket to store the Terraform state"
-}
-
-variable "region" {
-  type        = string
-  description = "AWS region where S3 bucket is located"
-}
-
 provider "aws" {
   region = var.region
 }
@@ -30,7 +20,7 @@ resource "aws_iam_role" "github_actions_role" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = "arn:aws:iam::AKIAUF7DYFCU6TGHH26M:oidc-provider/token.actions.githubusercontent.com"
+          Federated = "arn:aws:iam::287703574697:oidc-provider/token.actions.githubusercontent.com"
         }
         Action    = "sts:AssumeRoleWithWebIdentity"
         Condition = {
