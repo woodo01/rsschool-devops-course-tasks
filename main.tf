@@ -7,8 +7,8 @@ terraform {
   }
 
   backend "s3" {
-    region  = "us-east-1"
     bucket  = "rsschool-devops-terraform-state"
+    region  = "us-east-1"
     key     = "state/terraform.tfstate"
     encrypt = true
   }
@@ -31,7 +31,7 @@ resource "aws_iam_role" "github_actions_role" {
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
-          StringEquals = {
+          StringLike = {
             "token.actions.githubusercontent.com:sub" : "repo:woodo01/rsschool-devops-course-tasks:*"
           },
           StringEquals = {
