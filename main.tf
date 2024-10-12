@@ -8,7 +8,7 @@ terraform {
 
   backend "s3" {
     region  = "us-east-1"
-    bucket  = "rss-devops-tfstate"
+    bucket  = "rsschool-devops-terraform-state"
     key     = "state/terraform.tfstate"
     encrypt = true
   }
@@ -33,6 +33,9 @@ resource "aws_iam_role" "github_actions_role" {
         Condition = {
           StringEquals = {
             "token.actions.githubusercontent.com:sub" : "repo:woodo01/rsschool-devops-course-tasks:ref:refs/heads/main"
+          },
+          "StringEquals" = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
         }
       }
