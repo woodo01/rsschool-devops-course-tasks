@@ -1,9 +1,16 @@
 terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+
   backend "s3" {
-    bucket         = var.bucket_name
-    key            = "terraform/state/terraform.tfstate"
-    region         = var.region
-    encrypt        = true
+    region  = "us-east-1"
+    bucket  = "rss-devops-tfstate"
+    key     = "state/terraform.tfstate"
+    encrypt = true
   }
 }
 
