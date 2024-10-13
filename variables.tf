@@ -14,11 +14,6 @@ variable "instance_type" {
   default = "t2.micro"
 }
 
-variable "ec2_ami" {
-  description = "Which AMI use."
-  default     = "ami-0000000"
-}
-
 variable "azs" {
   type        = list(string)
   description = "Availability Zones"
