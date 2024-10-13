@@ -70,7 +70,7 @@ resource "aws_network_acl" "public" {
   }
 }
 
-resource "aws_network_acl" "public" {
+resource "aws_network_acl" "private" {
   vpc_id     = aws_vpc.root.id
   subnet_ids = aws_subnet.private_subnets[*].id
 
