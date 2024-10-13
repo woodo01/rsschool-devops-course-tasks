@@ -1,6 +1,6 @@
 resource "aws_security_group" "public" {
-  vpc_id      = aws_vpc.root.id
-  name        = "public"
+  vpc_id = aws_vpc.root.id
+  name   = "public"
 
   ingress {
     description = "Allow inbound HTTP traffic"
@@ -48,8 +48,8 @@ resource "aws_security_group" "public" {
 }
 
 resource "aws_security_group" "private" {
-  vpc_id      = aws_vpc.root.id
-  name        = "private"
+  vpc_id = aws_vpc.root.id
+  name   = "private"
 
   ingress {
     description     = "Allow inbound traffic from public subnets"
