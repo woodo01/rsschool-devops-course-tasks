@@ -81,8 +81,8 @@ resource "aws_security_group" "private" {
 }
 
 resource "aws_security_group" "k3s" {
-  vpc_id      = aws_vpc.root.id
-  name        = "ks3"
+  vpc_id = aws_vpc.root.id
+  name   = "ks3"
 
   ingress {
     from_port   = 22
