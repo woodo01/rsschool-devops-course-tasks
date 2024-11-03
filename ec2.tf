@@ -18,7 +18,6 @@ resource "aws_instance" "control_node" {
   subnet_id     = aws_subnet.public_subnets[0].id
   vpc_security_group_ids = [
     aws_security_group.public.id,
-    aws_security_group.private.id,
     aws_security_group.k3s.id
   ]
   key_name = aws_key_pair.my_key.key_name
