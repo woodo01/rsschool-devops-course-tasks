@@ -100,6 +100,8 @@ Configuration and deployment a Kubernetes (K8s) cluster on AWS using k3s. Verify
    kubectl get pvc -n jenkins
    ```
 
+4. **Verify Helm installation:**
+
    ```bash
    helm install my-nginx oci://registry-1.docker.io/bitnamicharts/nginx
    ```
