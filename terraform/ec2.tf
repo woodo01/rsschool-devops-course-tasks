@@ -12,7 +12,7 @@ resource "aws_instance" "bastion_host" {
 }
 
 resource "aws_instance" "control_node" {
-  ami           = data.aws_ami.ubuntu.id
+  ami           = data.aws_ami.amazon_linux.id
   instance_type = var.instance_type
   subnet_id     = aws_subnet.public_subnets[0].id
   vpc_security_group_ids = [
