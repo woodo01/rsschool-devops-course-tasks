@@ -37,36 +37,23 @@ jobs:
               with:
                 terraform_version: 1.6.0
 
-            - name: Terraform Init
-              run: terraform init
-
-            - name: Create terraform cache
-              uses: actions/cache/save@v4
-              with:
-                path: .terraform*
-                key: terraform-cache-${{ runner.os }}-${{ github.run_id }}
-
     check:
         needs: init
         runs-on: ubuntu-latest
         steps:
-            -   name: Checkout Code
-                uses: actions/checkout@v3
+            - name: Checkout Code
+              uses: actions/checkout@v3
 
-            -   name: Restore terraform cache
-                uses: actions/cache/restore@v4
-                with:
-                    path: .terraform*
-                    key: terraform-cache-${{ runner.os }}-${{ github.run_id }}
-                    fail-on-cache-miss: true
+            - name: Terraform Init
+              run: terraform init
 
             -   name: Set up Terraform
                 uses: hashicorp/setup-terraform@v3
                 with:
                     terraform_version: 1.6.0
 
-            -   name: Validate Terraform files
-                run: terraform validate
+            -  name: Validate Terraform files
+               run: terraform validate
 
             -   name: Check Formatting
                 run: terraform fmt -check
@@ -84,12 +71,8 @@ jobs:
                     aws-region: us-east-1
                     role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GithubActionsRole
 
-            -   name: Restore terraform cache
-                uses: actions/cache/restore@v4
-                with:
-                    path: .terraform*
-                    key: terraform-cache-${{ runner.os }}-${{ github.run_id }}
-                    fail-on-cache-miss: true
+            -   name: Terraform Init
+                run: terraform init
 
             -   name: Setup Terraform
                 uses: hashicorp/setup-terraform@v2
@@ -113,12 +96,8 @@ jobs:
                     aws-region: us-east-1
                     role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GithubActionsRole
 
-            -   name: Restore terraform cache
-                uses: actions/cache/restore@v4
-                with:
-                    path: .terraform*
-                    key: terraform-cache-${{ runner.os }}-${{ github.run_id }}
-                    fail-on-cache-miss: true
+            -   name: Terraform Init
+                run: terraform init
 
             -   name: Setup Terraform
                 uses: hashicorp/setup-terraform@v2
