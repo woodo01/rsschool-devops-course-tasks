@@ -5,20 +5,22 @@ resource "aws_instance" "bastion_host" {
   vpc_security_group_ids = [
     aws_security_group.public.id,
   ]
-  key_name = aws_key_pair.my_key.key_name
+  #   key_name = aws_key_pair.my_key.key_name
   tags = {
     Name = "Bastion Host"
   }
 }
 
 resource "aws_instance" "control_node" {
-  ami           = data.aws_ami.amazon_linux.id
+  ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
   subnet_id     = aws_subnet.public_subnets[0].id
   vpc_security_group_ids = [
     aws_security_group.k8s_public_temporal.id,
   ]
-  key_name = aws_key_pair.my_key.key_name
+
+  associate_public_ip_address = true
+  #   key_name = aws_key_pair.my_key.key_name
   tags = {
     Name = "K3S Control node"
   }
@@ -81,7 +83,7 @@ resource "aws_instance" "agent_node" {
     aws_security_group.private.id,
     aws_security_group.k3s.id
   ]
-  key_name = aws_key_pair.my_key.key_name
+  #   key_name = aws_key_pair.my_key.key_name
   tags = {
     Name = "K3S Agent node"
   }
@@ -98,12 +100,22 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
-resource "tls_private_key" "my_key" {
-  algorithm = "RSA"
-  rsa_bits  = 2048
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
+  }
 }
 
-resource "aws_key_pair" "my_key" {
-  key_name   = "SSH Private Key to connect to EC2 instances"
-  public_key = tls_private_key.my_key.public_key_openssh
-}
+# resource "tls_private_key" "my_key" {
+#   algorithm = "RSA"
+#   rsa_bits  = 2048
+# }
+#
+# resource "aws_key_pair" "my_key" {
+#   key_name   = "SSH Private Key to connect to EC2 instances"
+#   public_key = tls_private_key.my_key.public_key_openssh
+# }

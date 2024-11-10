@@ -1,6 +1,6 @@
 resource "aws_security_group" "k8s_public_temporal" {
-  name        = "K8S_public_temporal"
-  vpc_id      = aws_vpc.root.id
+  name   = "K8S_public_temporal"
+  vpc_id = aws_vpc.root.id
 
   ingress {
     from_port   = 0
