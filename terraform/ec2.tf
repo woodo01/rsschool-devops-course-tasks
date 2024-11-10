@@ -4,7 +4,6 @@ resource "aws_instance" "bastion_host" {
   subnet_id     = aws_subnet.public_subnets[0].id
   vpc_security_group_ids = [
     aws_security_group.public.id,
-    aws_security_group.private.id
   ]
   key_name = aws_key_pair.my_key.key_name
   tags = {
@@ -17,9 +16,7 @@ resource "aws_instance" "control_node" {
   instance_type = var.instance_type
   subnet_id     = aws_subnet.public_subnets[0].id
   vpc_security_group_ids = [
-    aws_security_group.public.id,
-    aws_security_group.private.id,
-    aws_security_group.k3s.id
+    aws_security_group.k8s_public_temporal.id,
   ]
   key_name = aws_key_pair.my_key.key_name
   tags = {
@@ -27,8 +24,14 @@ resource "aws_instance" "control_node" {
   }
   user_data = <<-EOF
               #!/bin/bash
-              sudo su
-              apt update && curl -sfL https://get.k3s.io | sh -
+              set -e
+              hostnamectl set-hostname "master-node"
+              sudo apt-get update -y
+              sudo apt-get install -y curl apt-transport-https git
+
+              # Install k3s with public IP in TLS SAN
+              curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--tls-san $(curl -s 2ip.io)" sh -
+
               # Wait for k3s to be ready
               while ! kubectl get nodes; do
                 echo "Waiting for k3s to be ready..."
@@ -47,109 +50,25 @@ resource "aws_instance" "control_node" {
                 sleep 10
               done
 
-              # Create Jenkins namespace and resources
-              kubectl create namespace jenkins
-
-              # Create PV and PVC
-              cat <<EOL | kubectl apply -f -
-              apiVersion: v1
-              kind: PersistentVolume
-              metadata:
-                name: jenkins-pv
-              spec:
-                capacity:
-                  storage: 8Gi
-                accessModes:
-                  - ReadWriteOnce
-                hostPath:
-                  path: "/tmp/jenkins-volume"
-              ---
-              apiVersion: v1
-              kind: PersistentVolumeClaim
-              metadata:
-                name: jenkins-pvc
-                namespace: jenkins
-              spec:
-                accessModes:
-                  - ReadWriteOnce
-                resources:
-                  requests:
-                    storage: 8Gi
-              EOL
-
-              # Create RBAC resources with Helm labels and annotations
-              cat <<EOL | kubectl apply -f -
-              apiVersion: v1
-              kind: ServiceAccount
-              metadata:
-                name: jenkins
-                namespace: jenkins
-                labels:
-                  app.kubernetes.io/managed-by: Helm
-                annotations:
-                  meta.helm.sh/release-name: jenkins
-                  meta.helm.sh/release-namespace: jenkins
-              ---
-              apiVersion: rbac.authorization.k8s.io/v1
-              kind: ClusterRole
-              metadata:
-                name: jenkins
-                labels:
-                  app.kubernetes.io/managed-by: Helm
-                annotations:
-                  meta.helm.sh/release-name: jenkins
-                  meta.helm.sh/release-namespace: jenkins
-              rules:
-                - apiGroups: ["*"]
-                  resources: ["*"]
-                  verbs: ["*"]
-              ---
-              apiVersion: rbac.authorization.k8s.io/v1
-              kind: ClusterRoleBinding
-              metadata:
-                name: jenkins
-                labels:
-                  app.kubernetes.io/managed-by: Helm
-                annotations:
-                  meta.helm.sh/release-name: jenkins
-                  meta.helm.sh/release-namespace: jenkins
-              subjects:
-                - kind: ServiceAccount
-                  name: jenkins
-                  namespace: jenkins
-              roleRef:
-                apiGroup: rbac.authorization.k8s.io
-                kind: ClusterRole
-                name: jenkins
-              EOL
-
+              # Install Helm
               curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
               echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
               sudo apt-get update -y
               sudo apt-get install -y helm
 
-              mkdir -p /tmp/jenkins-volume
-              chown -R 1000:1000 /tmp/jenkins-volume
+              # Clone the WordPress repository
+              mkdir -p /home/ubuntu/helm
+              sudo chown ubuntu:ubuntu /home/ubuntu/helm
+              git clone https://github.com/woodo01/rsschool-aws-devops-simple-wp-app.git /home/ubuntu/helm/wp
 
-              helm repo add jenkins https://charts.jenkins.io
-              helm repo update
+              # Wait for the repository to be cloned
+              sleep 10
 
-              while ! kubectl get namespace jenkins; do
-                echo "Waiting for jenkins namespace..."
-                sleep 5
-              done
+              # Install WordPress using Helm
+              helm install app-wordpress /home/ubuntu/helm/wp/wordpress --set wordpress.service.nodePort=32000
 
-              helm install jenkins jenkins/jenkins --namespace jenkins \
-                --set controller.serviceType=LoadBalancer \
-                --set persistence.enabled=true \
-                --set persistence.size=8Gi \
-                --set persistence.existingClaim=jenkins-pvc \
-                --set 'controller.installPlugins={cloudbees-credentials,git,workflow-aggregator,jacoco,configuration-as-code}'
-
-              while [[ $(kubectl get pods -n jenkins -l app.kubernetes.io/component=jenkins-controller -o jsonpath='{.items[*].status.containerStatuses[*].ready}' 2>/dev/null) != "true" ]]; do
-                echo "Waiting for Jenkins pod to be ready..."
-                sleep 10
-              done
+              # Ensure the services are running
+              kubectl get pods -A
               EOF
 }
 
