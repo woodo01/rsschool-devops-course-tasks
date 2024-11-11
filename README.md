@@ -118,3 +118,7 @@ Configuration and deployment a Kubernetes (K8s) cluster on AWS using k3s. Verify
    kubectl get pods
    kubectl get svc
    ```
+
+5. **Access the WordPress Application:**
+
+   Open a web browser and navigate to http://<ec2-instance-public-ip>:32000.
