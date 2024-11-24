@@ -11,7 +11,7 @@ variable "region" {
 }
 
 variable "instance_type" {
-  default = "t2.micro"
+  default = "t2.large"
 }
 
 variable "azs" {
