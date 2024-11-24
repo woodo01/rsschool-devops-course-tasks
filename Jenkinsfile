@@ -41,14 +41,21 @@ pipeline {
   triggers {
     GenericTrigger(
       causeString: 'Triggered by GitHub Push',
+      token: 'token',
       printPostContent: true,
       printContributedVariables: true,
       silentResponse: false
     )
   }
   environment {
+    AWS_ACCOUNT_ID = '287703574697'
+    AWS_REGION = 'us-east-1'
+    AWS_CREDENTIALS = 'aws-credentials'
     REPO_NAME = 'rest-api-app'
     IMAGE_TAG = 'latest'
+    SONAR_PROJECT_KEY = "simple-app"
+    SONAR_LOGIN = "sqp_3fca749f30de7b83ffa8301cea89d1543bad8ec9"
+    SONAR_HOST_URL = "http://57.121.16.245:9000"
   }
   stages {
     stage('Prepare') {
@@ -185,6 +192,28 @@ pipeline {
               }
             }
         }
+    }
+  }
+  post {
+    success {
+      script {
+        echo "Pipeline completed successfully!"
+        emailext(
+          subject: 'Jenkins Pipeline Success',
+            body: "'${env.JOB_NAME}' (#${env.BUILD_NUMBER}) has great success.\n\nReport: ${env.BUILD_URL}",
+          to: 'test@example.com'
+        )
+      }
+    }
+    failure {
+      script {
+        echo "Pipeline failed!"
+        emailext(
+          subject: 'Jenkins Pipeline Failure',
+            body: "'${env.JOB_NAME}' (#${env.BUILD_NUMBER}) failed.\n\nReport: ${env.BUILD_URL}",
+          to: 'test@exampe.com'
+        )
+      }
     }
   }
 }
