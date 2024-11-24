@@ -1,3 +1,28 @@
+resource "aws_security_group" "k8s_public_temporal" {
+  name   = "K8S_public_temporal"
+  vpc_id = aws_vpc.root.id
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all inbound traffic"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
+  }
+
+  tags = {
+    Name = "K8S_public_temporal"
+  }
+}
+
 resource "aws_security_group" "public" {
   vpc_id = aws_vpc.root.id
   name   = "public"
