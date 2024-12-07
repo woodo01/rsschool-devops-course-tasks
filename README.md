@@ -122,7 +122,7 @@ Configuration and deployment a Kubernetes (K8s) cluster on AWS using k3s. Verify
 ## Task 5: Simple Application Deployment with Helm
 1. **Access the WordPress Application:**
 
-   Open a web browser and navigate to http://<ec2-instance-public-ip>:32000.
+   Open a web browser and navigate to http://ec2-instance-public-ip:32000.
 
 ## Task 6: Simple Application Deployment with Helm
 1. **SonarQube Configuration:**
@@ -135,7 +135,7 @@ Configuration and deployment a Kubernetes (K8s) cluster on AWS using k3s. Verify
    It needs to create a project and generate a project token, which should be used in a Jenkinsfile for the pipeline.
 
 2. **Jenkins Configuration:**
-   Use http://<ec2-instance-public-ip>:8080 for Jenkins.
+   Use http://ec2-instance-public-ip:8080 for Jenkins.
    To retrieve password:
     
     ```bash
@@ -153,3 +153,15 @@ Configuration and deployment a Kubernetes (K8s) cluster on AWS using k3s. Verify
 
 3. **Jenkins Job**
     Create a new pipeline job and start it either manually or automatically on a push event
+
+## Task 7: Prometheus Deployment on Kubernetes
+When the Control Node is configured, you can access the Prometheus UI using its public IP and NodePort/ForwarderPort.
+
+For example:
+- Prometheus Query UI: `http://52.23.179.239:80/query`
+- Prometheus Alerts: `http://52.23.179.239:31492/#/alerts`
+
+To detect the correct port, use the following command on the Control Node:
+```bash
+kubectl get svc -n monitoring
+```
