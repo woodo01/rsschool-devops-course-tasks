@@ -155,7 +155,7 @@ Configuration and deployment a Kubernetes (K8s) cluster on AWS using k3s. Verify
     Create a new pipeline job and start it either manually or automatically on a push event
 
 ## Task 7: Prometheus Deployment on Kubernetes
-When the Control Node is configured, you can access the Prometheus UI using its public IP and NodePort/ForwarderPort.
+When the Control Node is configured, you can access the Prometheus UI using its public IP and NodePort/ForwardedPort.
 
 For example:
 - Prometheus Query UI: `http://52.23.179.239:80/query`
