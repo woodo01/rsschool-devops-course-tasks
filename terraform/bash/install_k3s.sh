@@ -163,6 +163,38 @@ kubectl exec -n jenkins svc/my-jenkins -c jenkins -- /bin/bash -c "jenkins-plugi
 
 kubectl rollout restart statefulset my-jenkins -n jenkins
 
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+
+# Install Prometheus using Bitnami Helm chart
+echo "Installing Prometheus using Bitnami Helm chart..."
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+kubectl create namespace monitoring || echo "Namespace monitoring already exists."
+
+helm install prometheus prometheus-community/prometheus \
+  --namespace monitoring \
+  --set server.service.type=LoadBalancer \
+  --set alertmanager.service.type=LoadBalancer \
+  --set pushgateway.service.type=LoadBalancer
+
+echo "Waiting for Prometheus to be ready..."
+while [[ $(kubectl get pods -n monitoring -o jsonpath='{.items[*].status.containerStatuses[*].ready}' 2>/dev/null | grep -c "true") -ne 1 ]]; do
+  echo "Waiting for Prometheus pod to be ready..."
+  sleep 10
+done
+
+echo "Installing Node Exporter..."
+helm install node-exporter prometheus-community/prometheus-node-exporter --namespace monitoring
+
+echo "Installing Kube State Metrics..."
+helm install kube-state-metrics prometheus-community/kube-state-metrics --namespace monitoring
+
+echo "Verifying Prometheus installation..."
+kubectl get pods -n monitoring
+kubectl get svc -n monitoring
+
 PUBLIC_IP=$(curl -s http://173.223.135.194/latest/meta-data/public-ipv4)
 echo "Public IP: $PUBLIC_IP"
 kubectl patch svc my-jenkins -n jenkins -p '{"spec": {"type": "LoadBalancer"}}'
@@ -172,9 +204,7 @@ JENKINS_PASSWORD=$(kubectl exec -n jenkins svc/my-jenkins -c jenkins -- cat /run
 [ -n "$JENKINS_PASSWORD" ] && echo "Jenkins admin password: $JENKINS_PASSWORD" || { echo "Failed to retrieve Jenkins admin password."; exit 1; }
 
 echo "Jenkins is accessible at http://$PUBLIC_IP:8080"
-
-# SonarQube URL
 echo "SonarQube is accessible at http://$PUBLIC_IP:9000"
+echo "Prometheus is accessible at http://$PUBLIC_IP:80"
 
-# Ensure the services are running
 kubectl get pods -A
